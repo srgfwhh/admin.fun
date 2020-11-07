@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{$common_title}</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    {include file="public/headercss" /}
+
+
+    <style>
+        /**
+         * 下拉框最高层悬浮
+         */
+        body .layui-layer-page .layui-layer-content {
+            position: relative;
+            overflow: visible;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">登录名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="keyword" placeholder="请输入账号或姓名" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">角色</label>
+                    <div class="layui-input-block">
+                        <select name="group_id">
+                            <option value="">请选择角色</option>
+                            {foreach $groups as $k => $v}
+                            <option value="{$v.id}}">{$v.title}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="LAY-user-back-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card-body">
+            <div style="padding-bottom: 10px;">
+                <button class="layui-btn layuiadmin-btn-admin" data-type="add">添加</button>
+            </div>
+
+            <table id="LAY-user-back-manage" lay-filter="LAY-user-back-manage"></table>
+
+            <script type="text/html" id="switchTpl">
+                {{ d.status == 1 ? '<span style="color: green">正常</span>' : '<span style="color: red">禁用</span>' }}
+            </script>
+
+
+            <script type="text/html" id="table-useradmin-admin">
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i
+                        class="layui-icon layui-icon-edit"></i>编辑</a>
+                {{#  if(d.group_nickname == 'ADMIN'){ }}
+                <a class="layui-btn layui-btn-disabled layui-btn-xs"><i class="layui-icon layui-icon-delete"></i>删除</a>
+                <a class="layui-btn layui-btn-disabled layui-btn-xs"><i class="layui-icon layui-icon-refresh"></i>重置密码</a>
+                {{#  } else { }}
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i
+                        class="layui-icon layui-icon-delete"></i>删除</a>
+                <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="reset"><i
+                        class="layui-icon layui-icon-refresh"></i>重置密码</a>
+                {{#  } }}
+            </script>
+        </div>
+    </div>
+</div>
+
+<div id="SetUser" class="demo-tree-more" style="display:none">
+
+    <div class="layui-form" lay-filter="layuiadmin-form-role" id="layuiadmin-form-role" style="padding: 20px 30px 0 0;">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色</label>
+            <div class="layui-input-block">
+                <select id="group_id" lay-filter="group">
+                    <option value="">请选择角色</option>
+                    {foreach $groups as $k => $v}
+                    <option value="{$v.id}" data-nickname="{$v.nickname}">{$v.title}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">账号</label>
+            <div class="layui-input-block">
+                <input type="text" name="account" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="nickname" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item parent" style="display: none;">
+            <label class="layui-form-label">所属主管</label>
+            <div class="layui-input-block">
+                <select id="parent_id">
+                    <option value="">请选择主管</option>
+                    {foreach $oms as $k => $v}
+                    <option value="{$v.id}">{$v.nickname}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" title="正常" checked>
+                <input type="radio" name="status" value="0" title="封禁">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{include file="public/footer" /}
+
+<script>
+    layui.use(['table', 'form'], function () {
+        var table = layui.table,
+            layer = layui.layer,
+            form = layui.form;
+
+        //监听搜索
+        form.on('submit(LAY-user-back-search)', function (data) {
+            var field = data.field;
+
+            //执行重载
+            table.reload('LAY-user-back-manage', {
+                where: field
+            });
+        });
+
+        table.render({
+            elem: '#LAY-user-back-manage'
+            , url: '/index/manageruser/users' //数据接口
+            , page: true //开启分页
+            , cols: [[ //表头
+                {field: 'id', title: 'ID', width: 80, sort: true, fixed: 'left'}
+                , {field: 'account', title: '账号'}
+                , {field: 'group_title', title: '角色'}
+                , {field: 'nickname', title: '姓名'}
+                , {field: 'status', title: '账号状态', templet: '#switchTpl'}
+                , {field: 'create_time', title: '创建时间'}
+                , {fixed: 'right', title: '操作', toolbar: '#table-useradmin-admin'}
+            ]]
+        });
+        table.on('tool(LAY-user-back-manage)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+
+                $("input[name='account']").val(data.account);
+                $("input[name='nickname']").val(data.nickname);
+
+                $("input[name=status][value='1']").prop("checked", data.status == 1 ? true : false);
+                $("input[name=status][value='0']").prop("checked", data.status == 0 ? true : false);
+                $("input[name='account']").attr("disabled", "");
+                $("#group_id").attr("disabled", "");
+
+                $("input[name='account']").val(data.account);
+                $("#group_id").val(data.group_id);
+
+                if (data.group_nickname == "OPS") {
+                    $(".parent").css("display", "");
+                    $("#parent_id").val(data.parent_id);
+                } else {
+
+                    $(".parent").css("display", "none");
+                }
+
+                form.render('radio');
+                form.render('select');
+
+                layer.open({
+                    type: 1,
+                    title: '编辑账号',
+                    offset: 'auto',
+                    area: '500px',
+                    resize: false,
+                    content: $('#SetUser'),
+                    btn: ['保存', '取消'],
+                    yes: function (index, layero) {
+
+                        var nickname = $("input[name='nickname']").val();
+                        var status = $("input[type='radio'][name=status]:checked").val();
+                        if (data.group_nickname == "OPS") {
+                            var parent_id = $("#parent_id").val();
+                            var dj = {'parent_id': parent_id, 'nickname': nickname, 'status': status, 'id': data.id};
+                        } else {
+                            var dj = {'nickname': nickname, 'status': status, 'id': data.id};
+
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: '/index/managerUser/setUser',
+                            dataType: "json",
+                            data: dj,
+                            success: function (res) {
+                                if (res.code !== 0) {
+                                    layer.msg(res.msg);
+                                    if (res.code == 101) {
+                                        window.parent.location.reload(true);
+                                    }
+                                } else {
+                                    layer.msg('修改成功', {
+                                        icon: 1,
+                                        time: 1000
+                                    }, function () {
+                                        layer.close(index); //关闭弹层
+                                        table.reload('LAY-user-back-manage');
+                                    });
+                                }
+                            }
+                        });
+
+
+                    }
+                });
+            }else if(obj.event === 'del'){
+                layer.confirm('确认删除该账号 "<span style="color: #999;">' + data.nickname + '</span>" 吗？', {icon: 3, title: '提示'}, function (index) {
+                    $.ajax({
+                        type: "POST",
+                        url: '/index/managerUser/delUser',
+                        dataType: "json",
+                        data: {
+                            'id': data.id,
+                        },
+                        success: function (res) {
+                            if (res.code !== 0) {
+                                layer.msg(res.msg);
+                                if (res.code == 101) {
+                                    window.parent.location.reload(true);
+                                }
+                            } else {
+                                layer.msg('删除成功', {
+                                    icon: 1,
+                                    time: 1000
+                                }, function () {
+                                    layer.close(index); //关闭弹层
+                                    table.reload('LAY-user-back-manage');
+                                });
+                            }
+                        }
+                    });
+                });
+            }else if(obj.event === 'reset'){
+                layer.confirm('确认重置该账号密码为”<span style="color: red;">jd123456</span>“吗？', {icon: 3, title: '提示'}, function (index) {
+                    $.ajax({
+                        type: "POST",
+                        url: '/index/managerUser/resetPsw',
+                        dataType: "json",
+                        data: {
+                            'id': data.id,
+                        },
+                        success: function (res) {
+                            if (res.code !== 0) {
+                                layer.msg(res.msg);
+                                if (res.code == 101) {
+                                    window.parent.location.reload(true);
+                                }
+                            } else {
+                                layer.msg('重置成功', {
+                                    icon: 1,
+                                    time: 1000
+                                }, function () {
+                                    layer.close(index); //关闭弹层
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+
+        });
+
+        var active = {
+            add: function () {
+
+                $(".parent").css("display", "none");
+                $("#parent_id").val("");
+
+                $("input[name='account']").val("");
+                $("input[name='account']").removeAttr("disabled");
+                $("#group_id").removeAttr("disabled");
+                $("#group_id").val("");
+                $("input[name='nickname']").val("");
+
+                $("input[name=status][value='1']").prop("checked", true);
+                var group_name;
+                form.on('select(group)', function (data) {
+                    group_name = $(data.elem).find("option:selected").data('nickname');
+                    if (group_name == "OPS") {
+                        $(".parent").css("display", "");
+                        $("#parent_id").val("");
+                    } else {
+                        $("#parent_id").val("");
+                        $(".parent").css("display", "none");
+                    }
+                    form.render('select');
+                });
+                form.render('radio');
+                form.render('select');
+                layer.open({
+                    type: 1,
+                    title: '添加账号',
+                    area: '500px',
+                    resize: false,
+                    content: $('#SetUser'),
+                    btn: ['保存', '取消'],
+                    yes: function (index, layero) {
+                        var group_id = $("#group_id").val();
+                        var account = $("input[name='account']").val();
+                        var nickname = $("input[name='nickname']").val();
+                        var status = $("input[type='radio'][name=status]:checked").val();
+                        var parent_id = $("#parent_id").val();
+                        if (group_name == "OPS") {
+                            var dj = {
+                                'group_id': group_id,
+                                'account': account,
+                                'nickname': nickname,
+                                'parent_id': parent_id,
+                                'status': status
+                            };
+                        } else {
+                            var dj = {'group_id': group_id, 'account': account, 'nickname': nickname, 'status': status};
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: '/index/manageruser/setUser',
+                            dataType: "json",
+                            data: dj,
+                            success: function (res) {
+                                if (res.code !== 0) {
+                                    layer.msg(res.msg);
+                                    if (res.code == 101) {
+                                        window.parent.location.reload(true);
+                                    }
+                                } else {
+                                    layer.msg('保存成功', {
+                                        icon: 1,
+                                        time: 1000
+                                    }, function () {
+                                        layer.close(index); //关闭弹层
+                                        //执行重载表格
+                                        table.reload('LAY-user-back-manage');
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        $('.layui-btn.layuiadmin-btn-admin').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+</script>
+</body>
+</html>
+

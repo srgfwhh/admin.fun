@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{$common_title}</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  {include file="public/headercss" /}
+</head>
+<body>
+
+  <div class="layui-fluid">
+    <div class="layui-card">
+      <div class="layui-card-body">
+        <div style="padding-bottom: 10px;">
+          <button class="layui-btn layuiadmin-btn-role" data-type="add">添加</button>
+        </div>
+        <table id="LAY-user-back-role" lay-filter="LAY-user-back-role"></table>
+
+        <script type="text/html" id="table-useradmin-admin">
+          <a class="layui-btn  layui-btn-xs" lay-event="edit">编辑</a>
+
+          {{#  if(d.nickname == 'ADMIN'){ }}
+          <a class="layui-btn layui-btn-disabled layui-btn-xs">删除</a>
+          {{#  } else { }}
+          <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+          {{#  } }}
+        </script>
+
+        <script type="text/html" id="switchTpl">
+          <!-- 这里的 checked 的状态只是演示 -->
+          {{ d.status == 1 ? '<span style="color: green">正常</span>' : '<span style="color: red">封禁</span>' }}
+        </script>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="EditGroup" class="demo-tree-more" style="display:none">
+
+    <div class="layui-form" lay-filter="layuiadmin-form-role" id="layuiadmin-form-role" style="padding: 20px 30px 0 0;">
+      <div class="layui-form-item">
+        <label class="layui-form-label">角色名称</label>
+        <div class="layui-input-block">
+          <input type="text" name="title"  lay-verify="required" placeholder="请输入角色名称" autocomplete="off"
+                 class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">角色别名</label>
+        <div class="layui-input-block">
+          <input type="text" name="nickname"  lay-verify="required" placeholder="请输入角色别名" autocomplete="off"
+                 class="layui-input">
+        </div>
+      </div>
+
+      <div class="layui-form-item">
+        <label class="layui-form-label">首页路径</label>
+        <div class="layui-input-block">
+          <input type="text" name="home_page"  lay-verify="required" placeholder="请输入角色首页路径" autocomplete="off"
+                 class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">角色状态</label>
+        <div class="layui-input-block">
+          <input type="radio" name="status" value="1" title="正常" checked>
+          <input type="radio" name="status" value="0" title="封禁">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">权限范围</label>
+        <div class="layui-input-block" style="left: -8px;">
+          <div id="nodes" class="demo-tree-more"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {include file="public/footer" /}
+
+  <script>
+    layui.use(['table','tree','form'], function(){
+      var table = layui.table,
+              tree = layui.tree,
+              layer = layui.layer,
+              form = layui.form;
+
+      //第一个实例
+      table.render({
+        elem: '#LAY-user-back-role'
+        ,url: '/index/groupuser/groups' //数据接口
+        ,page: false //开启分页
+        ,cols: [[ //表头
+          {field: 'id', title: 'ID', width:80, sort: true, fixed: 'left'}
+          ,{field: 'title', title: '角色名称'}
+          ,{field: 'nickname', title: '角色别名'}
+          ,{field: 'home_page', title: '首页路径'}
+          ,{field: 'statusName', title: '角色状态' ,templet: '#switchTpl'}
+          ,{fixed: 'right', title: '操作' ,toolbar: '#table-useradmin-admin'}
+        ]]
+      });
+
+      //监听行工具事件
+      table.on('tool(LAY-user-back-role)', function (obj) {
+        var data = obj.data;
+        if (obj.event === 'edit') {
+          //设置树状结构
+          $("#nodes").html("");
+          var rules = data.viewRules;
+          console.log(rules);
+          var nodes = JSON.parse(rules);
+          console.log(nodes);
+          var inst1 = tree.render({
+            elem: '#nodes'  //绑定元素
+            , showCheckbox: true  //是否显示复选框
+            , accordion: false
+            , data: nodes
+            , id: 'nodes'
+          });
+          $("input[name='home_page']").val(data.home_page);
+          $("input[name='title']").val(data.title);
+          $("input[name='nickname']").val(data.nickname);
+          $("input[name=status][value='1']").prop("checked", data.status == 1 ? true : false);
+          $("input[name=status][value='0']").prop("checked", data.status == 0 ? true : false);
+          form.render('radio'); //重新渲染单选框
+          $("input[name='nickname']").attr("disabled","");
+          layer.open({
+            type: 1,
+            title: '编辑角色',
+            offset: 'auto',
+            area: '500px',
+            resize: false,
+            content: $('#EditGroup'),
+            btn: ['保存', '取消'],
+            yes: function (index, layero) {
+
+              var title = $("input[name='title']").val();
+              var nickname = $("input[name='nickname']").val();
+              var status = $("input[type='radio'][name=status]:checked").val();
+              var home_page = $("input[name='home_page']").val();
+              var checkedData = tree.getChecked('nodes');
+              var list = new Array();
+              list = getChecked_list(checkedData);
+              $.ajax({
+                type: "POST",
+                url: '/index/groupuser/setGroup',
+                dataType: "json",
+                data: {'title': title, 'nickname': nickname, 'status': status, 'rules': list, 'id': data.id,'home_page':home_page},
+                success: function (res) {
+                  if (res.code !== 0) {
+                    layer.msg(res.msg);
+                    if (res.code == 101) {
+                      window.parent.location.reload(true);
+                    }
+                  } else {
+                    layer.msg('保存成功', {
+                      icon: 1,
+                      time: 1000
+                    }, function () {
+                      layer.close(index); //关闭弹层
+                      //执行重载表格
+                      table.reload('LAY-user-back-role', {
+                        where: {}
+                      });
+
+                    });
+                  }
+                }
+              });
+
+
+            }
+          });
+
+        }else if(obj.event === 'del'){
+          layer.confirm('确认删除该角色 "<span style="color: #999;">' + data.title + '</span>" 吗？', {icon: 3, title: '提示'}, function (index) {
+            $.ajax({
+              type: "POST",
+              url: '/index/groupUser/delGroup',
+              dataType: "json",
+              data: {
+                'id': data.id,
+              },
+              success: function (res) {
+                if (res.code !== 0) {
+                  layer.msg(res.msg);
+                  if (res.code == 101) {
+                    window.parent.location.reload(true);
+                  }
+                } else {
+                  layer.msg('删除成功', {
+                    icon: 1,
+                    time: 1000
+                  }, function () {
+                    layer.close(index); //关闭弹层
+                    table.reload('LAY-user-back-role');
+                  });
+                }
+              }
+            });
+          });
+        }
+      });
+
+
+      var active = {
+        add: function(){
+          $("input[name='title']").val("");
+          $("input[name='nickname']").val("");
+          $("input[name='home_page']").val("");
+          $("input[name=status][value='1']").prop("checked", true);
+          form.render('radio'); //重新渲染单选框
+          //设置树状结构
+          $("#nodes").html("");
+          var rules = '{$viewRules}';
+          console.log(rules);
+          var nodes = JSON.parse(rules);
+          console.log(nodes);
+          var inst1 = tree.render({
+            elem: '#nodes'  //绑定元素
+            , showCheckbox: true  //是否显示复选框
+            , accordion: false
+            , data: nodes
+            , id: 'nodes'
+          });
+          $("input[name='nickname']").removeAttr("disabled");
+          layer.open({
+            type: 1,
+            title: '添加角色',
+            offset: 'auto',
+            area: '500px',
+            resize: false,
+            content: $('#EditGroup'),
+            btn: ['保存', '取消'],
+            yes: function (index, layero) {
+              var title = $("input[name='title']").val();
+              var nickname = $("input[name='nickname']").val();
+              var home_page = $("input[name='home_page']").val();
+              var status = $("input[type='radio'][name=status]:checked").val();
+              var checkedData = tree.getChecked('nodes');
+              var list = new Array();
+              list = getChecked_list(checkedData);
+              $.ajax({
+                type: "POST",
+                url: '/index/groupuser/setGroup',
+                dataType: "json",
+                data: {'title': title, 'nickname': nickname, 'status': status, 'rules': list, 'home_page': home_page},
+                success: function (res) {
+                  if (res.code !== 0) {
+                    layer.msg(res.msg);
+                    if (res.code == 101) {
+                      window.parent.location.reload(true);
+                    }
+                  } else {
+                    layer.msg('保存成功', {
+                      icon: 1,
+                      time: 1000
+                    }, function () {
+                      layer.close(index); //关闭弹层
+                      table.reload('LAY-user-back-role', {
+                        where: {}
+                      });
+                    });
+                  }
+                }
+              });
+            }
+          });
+        }
+      }
+
+      $('.layui-btn.layuiadmin-btn-role').on('click', function(){
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+      });
+
+    });
+
+    function getChecked_list(data) {
+      var id = "";
+      $.each(data, function (index, item) {
+        if (id != "") {
+          id = id + "," + item.id;
+        } else {
+          id = item.id;
+        }
+        var i = getChecked_list(item.children);
+        if (i != "") {
+          id = id + "," + i;
+        }
+      });
+      return id;
+    }
+  </script>
+</body>
+</html>
+

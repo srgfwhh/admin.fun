@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>三更征稿后台</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    {include file="public/headercss" /}
+    <link rel="stylesheet" href="/static/layuiadmin/style/index.css" media="all">
+</head>
+<body class="layui-layout-body">
+
+<div id="LAY_app">
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <!-- 头部区域 -->
+            <ul class="layui-nav layui-layout-left">
+                <li class="layui-nav-item layadmin-flexible" lay-unselect>
+                    <a href="javascript:;" layadmin-event="flexible" title="侧边伸缩">
+                        <i class="layui-icon layui-icon-shrink-right" id="LAY_app_flexible"></i>
+                    </a>
+                </li>
+                <li class="layui-nav-item layui-hide-xs" lay-unselect>
+                    <a href="http://www.layui.com/admin/" target="_blank" title="前台">
+                        <i class="layui-icon layui-icon-website"></i>
+                    </a>
+                </li>
+                <li class="layui-nav-item" lay-unselect>
+                    <a href="javascript:;" layadmin-event="refresh" title="刷新">
+                        <i class="layui-icon layui-icon-refresh-3"></i>
+                    </a>
+                </li>
+
+                <li class="layui-nav-item layui-hide-xs">
+                    <a href="javascript:;" layadmin-event="refresh" title="清理缓存" class="clearCache">
+                        <i class="layui-icon layui-icon-delete"></i>
+                    </a>
+                </li>
+
+<!--                <li class="layui-nav-item layui-hide-xs" lay-unselect>-->
+<!--                    <input type="text" placeholder="搜索..." autocomplete="off" class="layui-input layui-input-search"-->
+<!--                           layadmin-event="serach" lay-action="template/search.html?keywords=">-->
+<!--                </li>-->
+
+            </ul>
+            <ul class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right">
+
+<!--                <li class="layui-nav-item" lay-unselect>-->
+<!--                    <a lay-href="app/message/index.html" layadmin-event="message" lay-text="消息中心">-->
+<!--                        <i class="layui-icon layui-icon-notice"></i>-->
+
+<!--                        &lt;!&ndash; 如果有新消息，则显示小圆点 &ndash;&gt;-->
+<!--                        <span class="layui-badge-dot"></span>-->
+<!--                    </a>-->
+<!--                </li>-->
+
+                <li class="layui-nav-item layui-hide-xs" lay-unselect>
+                    <a href="javascript:;" layadmin-event="theme">
+                        <i class="layui-icon layui-icon-theme"></i>
+                    </a>
+                </li>
+                <li class="layui-nav-item layui-hide-xs" lay-unselect>
+                    <a href="javascript:;" layadmin-event="note">
+                        <i class="layui-icon layui-icon-note"></i>
+                    </a>
+                </li>
+                <li class="layui-nav-item layui-hide-xs" lay-unselect>
+                    <a href="javascript:;" layadmin-event="fullscreen">
+                        <i class="layui-icon layui-icon-screen-full"></i>
+                    </a>
+                </li>
+                <li class="layui-nav-item" lay-unselect>
+                    <a href="javascript:;">
+                        <cite>{$nickname}</cite>
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a lay-href="index/managerUser/upInfo">基本资料</a></dd>
+                        <dd><a lay-href="index/managerUser/changePsw">修改密码</a></dd>
+                        <hr>
+                        <dd style="text-align: center;"><a href="/index/login/logout">退出</a></dd>
+                    </dl>
+                </li>
+
+                <li class="layui-nav-item layui-hide-xs" lay-unselect style="width: 56px;">
+<!--                    <a href="javascript:;" layadmin-event="about"><i-->
+<!--                            class="layui-icon layui-icon-more-vertical"></i></a>-->
+                </li>
+<!--                <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-unselect>-->
+<!--                    <a href="javascript:;" layadmin-event="more"><i class="layui-icon layui-icon-more-vertical"></i></a>-->
+<!--                </li>-->
+            </ul>
+        </div>
+
+        <!-- 侧边菜单 -->
+        <div class="layui-side layui-side-menu">
+            <div class="layui-side-scroll">
+                <div class="layui-logo" lay-href="{$home_page}">
+                    <span>三更征稿</span>
+                </div>
+                <nav>
+                    <ul class="layui-nav layui-nav-tree" id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu"
+                        lay-shrink="all">
+                        <li class="layui-card-body preloader">
+                            <label title="正在载入菜单..."><i class="layui-icon layui-icon-loading-1"></i> 正在载入菜单...</label>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 页面标签 -->
+        <div class="layadmin-pagetabs" id="LAY_app_tabs">
+            <div class="layui-icon layadmin-tabs-control layui-icon-prev" layadmin-event="leftPage"></div>
+            <div class="layui-icon layadmin-tabs-control layui-icon-next" layadmin-event="rightPage"></div>
+            <div class="layui-icon layadmin-tabs-control layui-icon-down">
+                <ul class="layui-nav layadmin-tabs-select" lay-filter="layadmin-pagetabs-nav">
+                    <li class="layui-nav-item" lay-unselect>
+                        <a href="javascript:;"></a>
+                        <dl class="layui-nav-child layui-anim-fadein">
+                            <dd layadmin-event="closeThisTabs"><a href="javascript:;">关闭当前标签页</a></dd>
+                            <dd layadmin-event="closeOtherTabs"><a href="javascript:;">关闭其它标签页</a></dd>
+                            <dd layadmin-event="closeAllTabs"><a href="javascript:;">关闭全部标签页</a></dd>
+                        </dl>
+                    </li>
+                </ul>
+            </div>
+            <div class="layui-tab" lay-unauto lay-allowClose="true" lay-filter="layadmin-layout-tabs">
+                <ul class="layui-tab-title" id="LAY_app_tabsheader">
+                    <li lay-id="{$home_page}" lay-attr="{$home_page}" class="layui-this"><i
+                            class="layui-icon layui-icon-home"></i></li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!-- 主体内容 -->
+        <div class="layui-body" id="LAY_app_body">
+            <div class="layadmin-tabsbody-item layui-show">
+                <iframe src="{$home_page}" frameborder="0" class="layadmin-iframe"></iframe>
+            </div>
+        </div>
+
+        <!-- 辅助元素，一般用于移动设备下遮罩 -->
+        <div class="layadmin-body-shade" layadmin-event="shade"></div>
+    </div>
+</div>
+
+{include file="public/footer" /}
+<script>
+
+
+
+    layui.config({
+        base: "/static/layuiadmin/extends/"
+    }).use(['navTree'], function () {
+        var navTree = layui.navTree;
+
+        //渲染导航菜单（出现左侧垂直导航）
+        var requestNavUrl = "/index/index/getMenu?"+ Math.random();	//请求导航菜单数据的接口地址（这里 json 是相对于 index.html 的路径）
+        navTree.render({
+            elem: '#LAY-system-side-menu',	//注意框架布局中应存在你指定的垂直导航容器
+            headerNavElem: false,	//头部水平导航将联动左侧垂直导航，如果不需要渲染头部水平导航，请设置为 false
+            url: requestNavUrl, //获取菜单json地址
+            recursion: false,	//已是树形结构，不需要递归
+            rootValue: 0,	//根节点主键值
+            home: "{$home_page}",	//默认或缺省时打开的页面链接
+            currentNavKey: "current_nav",
+            done: function () {
+                //菜单渲染完成后的回调方法
+                console.log("后台菜单渲染完成！");
+            }
+        });
+    });
+
+
+    //清除缓存
+    $(".clearCache").on("click", function () {
+
+        var layerIndex = layer.msg('清除缓存中，请稍候…', {icon: 16, time: false, shade: 0.8});
+        var localData = window.localStorage, sessionData = window.sessionStorage;
+        window.localStorage.clear();
+        window.setTimeout(function () {
+            layer.close(layerIndex);
+            layer.msg("缓存清除成功！");
+            location.reload();
+        }, 1000);
+    });
+
+</script>
+<script>
+    layui.config({
+        base: '/static/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use('index');
+</script>
+
+<!-- 百度统计 -->
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?d214947968792b839fd669a4decaaffc";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+</body>
+</html>
+
+
