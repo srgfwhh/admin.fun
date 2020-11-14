@@ -7,7 +7,7 @@
 *  使用前请执行 composer install 安装依赖包
 *  需要权限验证的，请继承application下的common控制器，因用的是5.0使用没有中间件使用，粗暴了一点
 
-
+*  后期会开放公众号模块，基于swoole和easyWechat组件,动态发送公众号消息
 ~~~
 www  WEB部署目录（或者子目录）
 ├─application           应用目录
