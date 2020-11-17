@@ -367,7 +367,7 @@ layui.define(["element", "jquery"], function (exports) {
                 navObj = config.elem.find('a[href="' + navParm + '"]');
             }
         } else {
-            navObj = config.elem.find('a[href="' + config.home + '"]');
+            navObj = config.elem.find('a[lay-href="' + config.home + '"]');
         }
         if (!navObj || navObj.length === 0) {
             return;
@@ -388,7 +388,7 @@ layui.define(["element", "jquery"], function (exports) {
             }
         });
         if (isRedirect) {
-            var href = navObj.attr("href") || config.home, target = navObj.attr("target") || config.target;
+            var href = navObj.attr("lay-href") || config.home, target = navObj.attr("target") || config.target;
             if (target == "_blank") {
                 return navParm && (window.top.location.href = href);
             } else if (window.frames[target]) {

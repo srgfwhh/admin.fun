@@ -138,7 +138,7 @@
         <!-- 主体内容 -->
         <div class="layui-body" id="LAY_app_body">
             <div class="layadmin-tabsbody-item layui-show">
-                <iframe src="{$home_page}" frameborder="0" class="layadmin-iframe"></iframe>
+                <iframe name="right" id="right" src="{$home_page}" frameborder="0" class="layadmin-iframe"></iframe>
             </div>
         </div>
 
@@ -166,7 +166,7 @@
             recursion: false,	//已是树形结构，不需要递归
             rootValue: 0,	//根节点主键值
             home: "{$home_page}",	//默认或缺省时打开的页面链接
-            currentNavKey: "current_nav",
+            currentNavKey: false,//禁用导航栏选中缓存，因为和这个组件不一样，我们有头部导航栏，不能兼容iframe主页
             done: function () {
                 //菜单渲染完成后的回调方法
                 console.log("后台菜单渲染完成！");
