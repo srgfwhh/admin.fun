@@ -8,7 +8,6 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
     {include file="public/headercss" /}
-    <link rel="stylesheet" href="/static/layuiadmin/style/index.css" media="all">
 </head>
 <body class="layui-layout-body">
 
@@ -167,6 +166,7 @@
             rootValue: 0,	//根节点主键值
             home: "{$home_page}",	//默认或缺省时打开的页面链接
             currentNavKey: false,//禁用导航栏选中缓存，因为和这个组件不一样，我们有头部导航栏，不能兼容iframe主页
+            paddingLeft:"22",
             done: function () {
                 //菜单渲染完成后的回调方法
                 console.log("后台菜单渲染完成！");
