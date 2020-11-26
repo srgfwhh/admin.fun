@@ -27,6 +27,11 @@ class Mananger
             ->field("id,title,parentId,href,icon")
             ->order("sort asc")
             ->select();
+        foreach ($menues as $k => $v){
+            if (trim($v['href']) && !strpos($v['href'],'http://') && !strpos($v['href'],'https://')){
+                $menues[$k]['href'] = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/' . $v['href'];//iframe后台打路由进入，会拼接相对地址然后就无限循环页面，索性给他加上http域名
+            }
+        }
         return $this->packageArray($menues->toArray());
     }
 
